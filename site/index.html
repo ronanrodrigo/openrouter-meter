@@ -323,6 +323,13 @@
   }
   .code-block .copy:hover { color: var(--ink); border-color: var(--line-strong); }
 
+  .sub-title {
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin: 40px 0 10px;
+  }
+
   .requirement {
     margin: 20px 0 0;
     font-size: 14px;
@@ -362,8 +369,8 @@
     <h1>OpenRouter Meter</h1>
     <p class="lede">Seu saldo da OpenRouter na barra de menus, e o consumo completo num clique.</p>
     <div class="actions">
-      <a class="btn btn-primary" href="https://github.com/ronanrodrigo/openrouter-meter">Ver no GitHub</a>
-      <a class="btn btn-secondary" href="#instalacao">Como instalar</a>
+      <a class="btn btn-primary" href="#instalacao">Instalar com Homebrew</a>
+      <a class="btn btn-secondary" href="https://github.com/ronanrodrigo/openrouter-meter">Ver no GitHub</a>
     </div>
 
     <figure class="hero-shot">
@@ -424,23 +431,42 @@
   <section id="instalacao" aria-labelledby="instalar">
     <div class="wrap">
       <h2 id="instalar">Como instalar</h2>
-      <p class="section-lede">O projeto é aberto e compila na sua máquina. Não há binário assinado distribuído — o caminho é o código-fonte.</p>
+      <p class="section-lede">A instalação é por Homebrew, num comando só. Cada release é compilada a partir do código-fonte e publicada como binário universal.</p>
 
       <ol class="steps">
-        <li>Clone o repositório.</li>
-        <li>Instale o XcodeGen, o SwiftLint e o SwiftFormat via Homebrew.</li>
-        <li>Rode <code>make app</code>: o projeto é gerado, compilado e o app abre.</li>
+        <li>Tenha o Homebrew instalado.</li>
+        <li>Rode o comando do cask: o tap, o download e a instalação acontecem de uma vez.</li>
+        <li>Abra o app: o medidor aparece na barra de menus.</li>
       </ol>
 
       <div class="code-block">
-        <button class="copy" type="button" data-copy>Copiar</button>
-        <pre id="comandos"><code>git clone https://github.com/ronanrodrigo/openrouter-meter.git
+        <button class="copy" type="button">Copiar</button>
+        <pre><code>brew install --cask ronanrodrigo/tap/openrouter-meter</code></pre>
+      </div>
+
+      <p class="requirement">O app não é notarizado; o cask remove a quarentena para que ele abra normalmente.</p>
+
+      <h3 class="sub-title">O tap e a manutenção</h3>
+      <ul class="steps">
+        <li>Tap: <code>ronanrodrigo/homebrew-tap</code>, cask <code>openrouter-meter</code>. O comando acima já traz o tap; a variante explícita é <code>brew tap ronanrodrigo/tap</code> e, em seguida, <code>brew install --cask openrouter-meter</code>.</li>
+        <li>Atualizar: <code>brew upgrade --cask openrouter-meter</code>.</li>
+        <li>Desinstalar: <code>brew uninstall --cask openrouter-meter</code>.</li>
+      </ul>
+
+      <p>Cada release compilada a partir do código-fonte fica em <a href="https://github.com/ronanrodrigo/openrouter-meter/releases">github.com/ronanrodrigo/openrouter-meter/releases</a>, em zip universal para arm64 e x86_64.</p>
+
+      <h3 class="sub-title">Compilar do código-fonte</h3>
+      <p>O projeto continua aberto. Se você prefere compilar na sua máquina, clone o repositório, instale as ferramentas de build e rode o <code>make app</code>.</p>
+
+      <div class="code-block">
+        <button class="copy" type="button">Copiar</button>
+        <pre><code>git clone https://github.com/ronanrodrigo/openrouter-meter.git
 cd openrouter-meter
 brew install xcodegen swiftlint swiftformat
 make app</code></pre>
       </div>
 
-      <p class="requirement">Requisitos: macOS 15 ou superior, com Xcode 26 e a toolchain do Swift 6 instalados.</p>
+      <p class="requirement">Requisitos: macOS 15 ou mais recente. Xcode 26 e a toolchain do Swift 6 são necessários apenas no caminho do código-fonte.</p>
     </div>
   </section>
 </main>
@@ -456,13 +482,17 @@ make app</code></pre>
 
 <script>
   (function () {
-    var btn = document.querySelector('[data-copy]');
-    var pre = document.getElementById('comandos');
-    if (!btn || !pre || !navigator.clipboard) return;
-    btn.addEventListener('click', function () {
-      navigator.clipboard.writeText(pre.innerText).then(function () {
-        btn.textContent = 'Copiado';
-        setTimeout(function () { btn.textContent = 'Copiar'; }, 1600);
+    var blocks = document.querySelectorAll('.code-block');
+    if (!blocks.length || !navigator.clipboard) return;
+    Array.prototype.forEach.call(blocks, function (block) {
+      var btn = block.querySelector('.copy');
+      var pre = block.querySelector('pre');
+      if (!btn || !pre) return;
+      btn.addEventListener('click', function () {
+        navigator.clipboard.writeText(pre.innerText).then(function () {
+          btn.textContent = 'Copiado';
+          setTimeout(function () { btn.textContent = 'Copiar'; }, 1600);
+        });
       });
     });
   })();

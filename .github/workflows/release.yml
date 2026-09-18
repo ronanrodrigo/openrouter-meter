@@ -1,0 +1,139 @@
+name: release
+
+# Publicação do app: dispara no push de uma tag v*, empacota o zip universal e cria o
+# release no GitHub Releases com o zip e o .sha256.
+#
+# Relação com os outros arquivos:
+# - docs/adr/0005-distribuicao-homebrew-cask.md é a decisão que autoriza esta etapa nova.
+#   O gate continua sendo `make verify-pr` (ver docs/adr/0004-ci-github-actions.md).
+# - .github/workflows/verify.yml cobre push na main e pull_request; este aqui cobre apenas
+#   a tag de release. O passo de verificação é o mesmo: `make verify-pr`.
+# - O zip é empacotado por scripts/package.sh; aqui não reimplementamos o empacotamento.
+# - A atualização do tap (cask) só roda se o segredo TAP_GITHUB_TOKEN existir; sem ele, o
+#   comando local que atualiza o cask é escrito no summary do job.
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: macos-15
+    steps:
+      - name: Baixar o repositório
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Derivar a versão da tag
+        id: version
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          VERSION="${TAG#v}"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "versão: $VERSION (tag $TAG)"
+
+      - name: Instalar as ferramentas que faltarem
+        run: |
+          for tool in xcodegen swiftlint swiftformat; do
+            if ! command -v "$tool" >/dev/null; then
+              brew install "$tool"
+            fi
+          done
+
+      - name: Cache do SwiftPM
+        uses: actions/cache@v4
+        with:
+          path: |
+            Packages/Domain/.build
+            Packages/Application/.build
+            Packages/Infrastructure/.build
+          key: ${{ runner.os }}-spm-${{ hashFiles('Packages/*/Package.swift') }}
+          restore-keys: |
+            ${{ runner.os }}-spm-
+
+      - name: Rodar o gate
+        run: make verify-pr
+
+      - name: Empacotar o zip universal
+        run: bash scripts/package.sh "${{ steps.version.outputs.version }}"
+
+      - name: Preparar as notas de release
+        id: notes
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          NOTES="packaging/release-notes/v$VERSION.md"
+          if [ ! -f "$NOTES" ]; then
+            echo "v$VERSION.md ausente; usando TEMPLATE.md"
+            NOTES="build/dist/release-notes-$VERSION.md"
+            sed "s/__VERSION__/$VERSION/g" packaging/release-notes/TEMPLATE.md > "$NOTES"
+          fi
+          echo "file=$NOTES" >> "$GITHUB_OUTPUT"
+
+      - name: Publicar o release no GitHub
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          TAG="${{ steps.version.outputs.tag }}"
+          # Idempotente: se o release já existe (retentativa do job, ou release criado antes
+          # a partir da máquina de desenvolvimento), atualiza os assets em vez de falhar.
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "release $TAG já existe; atualizando os assets"
+            gh release upload "$TAG" \
+              "build/dist/OpenRouterMeter-$VERSION.zip" \
+              "build/dist/OpenRouterMeter-$VERSION.zip.sha256" \
+              --clobber
+            gh release edit "$TAG" \
+              --title "OpenRouter Meter $VERSION" \
+              --notes-file "${{ steps.notes.outputs.file }}"
+          else
+            gh release create "$TAG" \
+              "build/dist/OpenRouterMeter-$VERSION.zip" \
+              "build/dist/OpenRouterMeter-$VERSION.zip.sha256" \
+              --title "OpenRouter Meter $VERSION" \
+              --notes-file "${{ steps.notes.outputs.file }}" \
+              --verify-tag
+          fi
+
+      - name: Detectar o segredo do tap
+        id: tap
+        env:
+          TAP_GITHUB_TOKEN: ${{ secrets.TAP_GITHUB_TOKEN }}
+        run: |
+          if [ -n "$TAP_GITHUB_TOKEN" ]; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      # O cask é atualizado a partir do release publicado (scripts/sync-tap.sh lê o sha256 do
+      # asset), para o cask nunca apontar para um hash que não é o do zip publicado.
+      - name: Atualizar o cask em ronanrodrigo/homebrew-tap
+        if: steps.tap.outputs.available == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.TAP_GITHUB_TOKEN }}
+        run: bash scripts/sync-tap.sh "${{ steps.version.outputs.version }}"
+
+      - name: Avisar como atualizar o cask sem o segredo
+        if: steps.tap.outputs.available != 'true'
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          {
+            echo "## Tap não atualizado automaticamente"
+            echo
+            echo "O segredo TAP_GITHUB_TOKEN não está configurado, então o cask do tap não foi atualizado."
+            echo "Para atualizar o cask a partir da sua máquina, na raiz do repositório do app:"
+            echo
+            echo '```bash'
+            echo "make sync-tap VERSION=$VERSION"
+            echo '```'
+            echo
+            echo "Ou configure o segredo TAP_GITHUB_TOKEN (com escopo de escrita no repositório"
+            echo "ronanrodrigo/homebrew-tap) para que este workflow passe a atualizar o tap sozinho."
+          } >> "$GITHUB_STEP_SUMMARY"

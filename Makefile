@@ -6,7 +6,7 @@ SCHEME := OpenRouterMeter
 DESTINATION ?= platform=macOS
 RESULT_BUNDLE := build/TestResults.xcresult
 
-.PHONY: help tools format format-check lint build test test-packages test-app coverage generate verify-pr clean app run
+.PHONY: help tools format format-check lint build test test-packages test-app coverage generate verify-pr clean app run package release
 
 help:
 	@grep -E '^[a-z:-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-14s\033[0m %s\n", $$1, $$2}'
@@ -61,6 +61,22 @@ app: build ## Compila e abre o app
 		| awk -F' = ' '/ BUILT_PRODUCTS_DIR/ {print $$2}' | head -1)/OpenRouterMeter.app"
 
 run: app ## Alias de app
+
+# O zip universal (arm64 + x86_64) e o .sha256 que alimentam o release e o cask do tap.
+# VERSION é opcional: sem ela, scripts/package.sh usa MARKETING_VERSION do project.yml.
+package: ## Empacota o zip universal e o sha256 em build/dist
+	bash scripts/package.sh $(VERSION)
+
+# Publica o release no GitHub e atualiza o cask em ronanrodrigo/homebrew-tap.
+# VERSION é obrigatória e precisa bater com MARKETING_VERSION do project.yml.
+release: ## Publica o release e atualiza o tap (VERSION=x.y.z obrigatório)
+	@[ -n "$(VERSION)" ] || { echo "informe a versão: make release VERSION=1.0.0"; exit 1; }
+	bash scripts/release.sh $(RELEASE_FLAGS) $(VERSION)
+
+# Atualiza só o cask do tap, a partir do release já publicado (lê o sha256 do asset).
+sync-tap: ## Sincroniza o cask do tap com o release publicado (VERSION=x.y.z obrigatório)
+	@[ -n "$(VERSION)" ] || { echo "informe a versão: make sync-tap VERSION=1.0.0"; exit 1; }
+	bash scripts/sync-tap.sh $(VERSION)
 
 clean: ## Remove artefatos gerados
 	rm -rf build $(PROJECT)

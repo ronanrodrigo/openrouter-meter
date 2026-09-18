@@ -93,9 +93,17 @@ sequenceDiagram
 
 O mesmo `execute()` roda em intervalo configurável (padrão 300s) e a cada abertura do painel.
 
+## Distribuição
+
+O app é distribuído por Homebrew cask, no tap público `ronanrodrigo/homebrew-tap`
+(`brew install --cask ronanrodrigo/tap/openrouter-meter`), com release automatizado por tag.
+Compilar do código-fonte continua sendo o caminho de desenvolvedor. A decisão, a assinatura
+ad-hoc sem notarização e o tratamento de quarentena estão no ADR 0005.
+
 ## Decisões registradas
 
 - [ADR 0001 — App de barra de menus em camadas SwiftPM](adr/0001-architecture.md)
 - [ADR 0002 — Fontes de dados e degradação](adr/0002-data-sources.md)
 - [ADR 0003 — Duas políticas de cobertura](adr/0003-coverage-policy.md)
 - [ADR 0004 — CI no GitHub Actions](adr/0004-ci-github-actions.md)
+- [ADR 0005 — Distribuição por Homebrew cask](adr/0005-distribuicao-homebrew-cask.md)
