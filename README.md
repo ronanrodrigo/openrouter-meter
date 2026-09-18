@@ -294,6 +294,6 @@ uma vulnerabilidade, veja [`SECURITY.md`](SECURITY.md); o projeto segue o
 
 <div align="center">
 
-<sub><a href="https://github.com/ronanrodrigo/openrouter-meter">github.com/ronanrodrigo/openrouter-meter</a> · <a href="https://openrouter-meter.vercel.app">openrouter-meter.vercel.app</a></sub>
+<sub><a href="https://github.com/ronanrodrigo/openrouter-meter">github.com/ronanrodrigo/openrouter-meter</a> · <a href="https://ronanrodrigo.dev/lab/openrouter-meter">ronanrodrigo.dev/lab/openrouter-meter</a></sub>
 
 </div>

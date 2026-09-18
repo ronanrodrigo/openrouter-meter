@@ -61,6 +61,22 @@ o que está em andamento e o estado do gate.
   taps de terceiros: instalar pelo nome completo do cask já autoriza; pelo nome curto, é
   preciso `brew trust --cask ronanrodrigo/tap/openrouter-meter`.
 
+## 2026-09-18 — A landing sai do projeto e vira página do lab
+
+- A página de apresentação deixou de ser um segundo site mantido aqui: ela
+  agora vive no site pessoal, em
+  <https://ronanrodrigo.dev/lab/openrouter-meter>, dentro do lab, com o
+  desenho refeito nos tokens do site.
+- `site/` fica só com o `vercel.json` que responde 308 de qualquer caminho
+  de `openrouter-meter.vercel.app` para a página nova; `index.html` e
+  `assets/` saíram do repositório (os prints agora estão em
+  `public/lab/openrouter-meter/` no `ronanrodrigo/site`) e o rodapé do
+  README aponta para o endereço novo.
+- Motivo: duas apresentações do mesmo app divergem — a cópia local já
+  estava mais desatualizada que a página do lab, e manter dois lugares
+  para instalar/atualizar prints não paga o custo.
+- O app, o cask e o release não mudam: nada aqui toca código Swift.
+
 ## Estado atual
 
 - Gate local `make verify-pr` verde na máquina de desenvolvimento.
