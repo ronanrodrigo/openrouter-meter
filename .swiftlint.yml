@@ -1,0 +1,47 @@
+# SwiftLint é especificação executável de arquitetura, não estética.
+# As fronteiras de camada ficam em configurações aninhadas: o SwiftLint aplica
+# o `.swiftlint.yml` do diretório mais próximo, então cada camada declara a sua regra
+# sem precisar de `included` (que a versão 0.65 não aceita mais em custom_rules).
+included:
+  - Packages
+  - OpenRouterMeter
+
+excluded:
+  - .build
+  - DerivedData
+  - build
+  # Cada pacote SwiftPM tem o próprio diretório de build; sem isto o lint varre
+  # os fontes gerados pelo swift-testing e reprova código que não é nosso.
+  - Packages/Domain/.build
+  - Packages/Application/.build
+  - Packages/Infrastructure/.build
+
+# A vírgula final em coleções multilinha é decisão do SwiftFormat (formatter do projeto),
+# que a insere sempre. Discutir isso aqui produziria gate vermelho por estilo de vírgula.
+disabled_rules:
+  - trailing_comma
+
+line_length:
+  warning: 120
+  error: 160
+
+identifier_name:
+  min_length: 2
+  excluded:
+    - id
+    - ok
+
+type_body_length:
+  warning: 320
+  error: 500
+
+file_length:
+  warning: 400
+  error: 600
+
+custom_rules:
+  no_secrets_in_source:
+    name: "Sem credencial no código"
+    message: "Credencial nunca é literal no fonte; use Keychain ou arquivo de ambiente fora do git."
+    regex: '(apiKey|api_key|secret|token|password)\s*(:\s*String\s*)?=\s*"[^"]{6,}"'
+    severity: error

@@ -1,0 +1,13 @@
+# Regras exclusivas da camada Application: orquestração pura, sem UI, sem IO, sem fornecedor.
+custom_rules:
+  application_no_ui:
+    name: "Application sem UI nem persistência"
+    message: "Application orquestra: não importa UI, persistência nem SDK."
+    regex: '^\s*import\s+(AppKit|SwiftUI|UIKit|Combine|Observation|CoreData|Network|SQLite3|Security)\b'
+    severity: error
+
+  application_no_outer_layer:
+    name: "Application não importa camada externa"
+    message: "Application não importa Infrastructure nem PresentationKit."
+    regex: '^\s*import\s+(Infrastructure|PresentationKit)\b'
+    severity: error

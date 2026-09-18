@@ -1,0 +1,21 @@
+# Artefatos gerados
+*.xcodeproj
+DerivedData/
+.build/
+.swiftpm/
+xcuserdata/
+*.xcresult
+build/
+
+# Credenciais e assinatura — nunca versionados
+*.p12
+*.cer
+*.mobileprovision
+*.provisionprofile
+AuthKey_*.p8
+*.xcconfig
+.env
+.env.*
+
+# macOS
+.DS_Store

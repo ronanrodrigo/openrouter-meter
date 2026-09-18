@@ -1,0 +1,13 @@
+# Regras exclusivas da camada Domain: nada de framework, nada de camada externa.
+custom_rules:
+  domain_purity:
+    name: "Domain é puro"
+    message: "Domain não importa framework nem camada externa."
+    regex: '^\s*import\s+(Foundation|AppKit|SwiftUI|UIKit|Combine|Observation|CoreData|Network|OSLog|SQLite3|Security)\b'
+    severity: error
+
+  domain_no_outer_layer:
+    name: "Domain não importa camada externa"
+    message: "Domain não importa Application, Infrastructure nem PresentationKit."
+    regex: '^\s*import\s+(Application|Infrastructure|PresentationKit)\b'
+    severity: error

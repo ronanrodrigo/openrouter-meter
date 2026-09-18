@@ -1,0 +1,7 @@
+--swiftversion 6.0
+--indent 4
+--maxwidth 120
+--wrapelements before-first
+--stripunusedargs closure-only
+--disable wrapMultilineStatementBraces
+--exclude .build,DerivedData,build

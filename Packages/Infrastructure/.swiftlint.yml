@@ -1,0 +1,7 @@
+# Regras exclusivas da camada Infrastructure: isola SDK e IO, nunca UI.
+custom_rules:
+  infrastructure_no_ui:
+    name: "Infrastructure sem UI"
+    message: "Infrastructure isola SDK e IO: nada de UI."
+    regex: '^\s*import\s+(AppKit|SwiftUI|UIKit)\b'
+    severity: error

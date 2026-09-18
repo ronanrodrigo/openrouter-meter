@@ -1,0 +1,7 @@
+# Regras exclusivas do target de app: observação moderna obrigatória.
+custom_rules:
+  legacy_observation:
+    name: "Observação moderna"
+    message: "Use @Observable e @State; ObservableObject, @Published e @StateObject são proibidos."
+    regex: '(@Published|@StateObject)\b|:\s*ObservableObject\b'
+    severity: error

@@ -1,0 +1,7 @@
+# Regras exclusivas dos adaptadores de Sample: determinísticos e em memória.
+custom_rules:
+  sample_purity:
+    name: "Sample sem IO"
+    message: "Adaptador de Sample é determinístico e em memória: sem SDK, sem URLSession, sem FileManager."
+    regex: '\b(URLSession|FileManager|SecItemAdd)\b'
+    severity: error
