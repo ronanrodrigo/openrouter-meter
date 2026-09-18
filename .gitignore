@@ -16,6 +16,19 @@ AuthKey_*.p8
 *.xcconfig
 .env
 .env.*
+.env.local
+
+# Artefatos de teste e cobertura
+coverage/
+
+# Ferramentas locais e agentes
+.claude/
+.hermes/
+.codex/
+node_modules/
+
+# Deploy
+.vercel
 
 # macOS
 .DS_Store

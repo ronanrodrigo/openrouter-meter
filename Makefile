@@ -43,14 +43,15 @@ test-packages: ## Testes dos pacotes SwiftPM (rápidos, sem app)
 test-app: generate ## Testes do target de app
 	xcodebuild test -project $(PROJECT) -scheme $(SCHEME) -destination '$(DESTINATION)' -enableCodeCoverage NO
 
-# O alvo de app é medido e reportado, sem mínimo: as views SwiftUI são declarativas e a
-# verificação delas é visual; a lógica testável vive nos pacotes e no view model.
-coverage: ## Cobertura: 80% nos pacotes; alvo de app apenas reportado
+# A cobertura do alvo de app tem mínimo desde que o harness de renderização
+# (OpenRouterMeter/Tests/ViewRenderingTests.swift) passou a desenhar cada view de verdade,
+# em claro e em escuro, e a exigir render não vazio — ver ADR 0003.
+coverage: ## Cobertura: 80% nos pacotes e 70% no alvo de app
 	@for pkg in $(PACKAGES); do python3 scripts/check-coverage.py package Packages/$$pkg --minimum 80 || exit 1; done
 	rm -rf $(RESULT_BUNDLE)
 	xcodebuild test -project $(PROJECT) -scheme $(SCHEME) -destination '$(DESTINATION)' \
 		-enableCodeCoverage YES -resultBundlePath $(RESULT_BUNDLE)
-	python3 scripts/check-coverage.py xcresult $(RESULT_BUNDLE) --minimum 0
+	python3 scripts/check-coverage.py xcresult $(RESULT_BUNDLE) --minimum 70
 
 verify-pr: tools format-check lint test coverage ## Gate completo antes do PR
 

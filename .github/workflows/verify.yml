@@ -1,0 +1,38 @@
+name: verify-pr
+
+# O gate é único e vive no Makefile: este workflow só o executa numa máquina limpa.
+# Roda em push na main e em pull request. Ver docs/adr/0004-ci-github-actions.md.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verify-pr:
+    runs-on: macos-15
+    steps:
+      - name: Baixar o repositório
+        uses: actions/checkout@v4
+
+      - name: Instalar as ferramentas que faltarem
+        run: |
+          for tool in xcodegen swiftlint swiftformat; do
+            if ! command -v "$tool" >/dev/null; then
+              brew install "$tool"
+            fi
+          done
+
+      - name: Cache do SwiftPM
+        uses: actions/cache@v4
+        with:
+          path: |
+            Packages/Domain/.build
+            Packages/Application/.build
+            Packages/Infrastructure/.build
+          key: ${{ runner.os }}-spm-${{ hashFiles('Packages/*/Package.swift') }}
+          restore-keys: |
+            ${{ runner.os }}-spm-
+
+      - name: Rodar o gate
+        run: make verify-pr

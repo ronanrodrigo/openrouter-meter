@@ -30,9 +30,12 @@ Rode `make verify-pr` antes de declarar qualquer trabalho pronto e cole a saída
 - **`@Observable` é o padrão**; `ObservableObject`, `@Published` e `@StateObject` são proibidos.
 - **Sem credencial no fonte**: a chave vive no Keychain ou em `$HERMES_HOME/.env` (fora do git).
 - **Sem segredo em artefato**: nunca versione `.p12`, provisioning profile, `.p8` ou `.env`.
-- **Cobertura**: 80% de linhas com gate nos pacotes (`Domain`, `Application`, `Infrastructure`).
-  O alvo de app é medido e reportado sem mínimo — ver ADR 0003. Nunca rebaixe o mínimo dos
-  pacotes para fazer uma mudança passar; mudança de política exige ADR.
+- **Cobertura**: 80% de linhas com gate nos pacotes (`Domain`, `Application`,
+  `Infrastructure`) e 70% no target de app. O alvo de app tem mínimo desde o harness de
+  renderização das views (`OpenRouterMeter/Tests/ViewRenderingTests.swift`), que desenha cada
+  view com `ImageRenderer` em claro e em escuro. Números de hoje e a política completa: ver
+  ADR 0003. Nunca rebaixe os mínimos para fazer uma mudança passar; mudança de política exige
+  ADR.
 - **`.xcodeproj` não é versionado**: é gerado por `xcodegen generate` a partir de `project.yml`.
 
 ## Mapa do repositório

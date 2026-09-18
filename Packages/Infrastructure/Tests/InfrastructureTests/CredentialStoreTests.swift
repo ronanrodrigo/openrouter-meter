@@ -104,4 +104,23 @@ struct KeychainCredentialStoreTests {
         await store.clear()
         #expect(await store.credential() == nil)
     }
+
+    @Test("grava, lê de volta, atualiza e remove, em serviço isolado")
+    func roundTrip() async throws {
+        // Serviço aleatório: o item criado aqui nunca colide com o do aplicativo em execução
+        // e é removido no fim do teste.
+        let service = "dev.ronanrodrigo.OpenRouterMeter.testes.\(UUID().uuidString)"
+        let store = KeychainCredentialStore(service: service)
+
+        // Primeira gravação: o item não existe, então o caminho é o de inserção.
+        try await store.save("chave-1")
+        #expect(await store.credential() == "chave-1")
+
+        // Segunda gravação: o item já existe, então o caminho é o de atualização.
+        try await store.save("chave-2")
+        #expect(await store.credential() == "chave-2")
+
+        await store.clear()
+        #expect(await store.credential() == nil)
+    }
 }

@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OpenRouter Meter — seu saldo da OpenRouter na barra de menus</title>
+<meta name="description" content="App de barra de menus do macOS que mostra o saldo restante da conta OpenRouter e, num clique, o consumo detalhado: tokens, chamadas, custo e modelos de hoje e dos últimos sete dias.">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f7f4ef" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#16130f" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="assets/icone.png" type="image/png">
+<link rel="apple-touch-icon" href="assets/icone.png">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="OpenRouter Meter — seu saldo da OpenRouter na barra de menus">
+<meta property="og:description" content="O saldo restante da sua conta OpenRouter na barra de menus do macOS e o consumo completo num clique: tokens, chamadas, custo e modelos de hoje e dos últimos sete dias.">
+<meta property="og:url" content="https://openrouter-meter.vercel.app/">
+<meta property="og:image" content="https://openrouter-meter.vercel.app/assets/painel-escuro.png">
+<meta property="og:image:width" content="580">
+<meta property="og:image:height" content="1200">
+<meta property="og:image:alt" content="Painel do OpenRouter Meter em modo escuro, com saldo restante, requisições gratuitas e consumo de hoje e dos últimos sete dias.">
+<meta property="og:locale" content="pt_BR">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="OpenRouter Meter — seu saldo da OpenRouter na barra de menus">
+<meta name="twitter:description" content="O saldo restante da sua conta OpenRouter na barra de menus do macOS e o consumo completo num clique.">
+<meta name="twitter:image" content="https://openrouter-meter.vercel.app/assets/painel-escuro.png">
+<meta name="twitter:image:alt" content="Painel do OpenRouter Meter em modo escuro, com saldo restante e consumo detalhado.">
+
+<style>
+  :root {
+    --bg: #f7f4ef;
+    --surface: #fffdfa;
+    --surface-2: #efeade;
+    --ink: #2b2118;
+    --ink-soft: #5c5145;
+    --ink-faint: #8a7f72;
+    --line: #ded7c9;
+    --line-strong: #c9c0ae;
+    --accent: #80A269;
+    --accent-ink: #3f5a30;
+    --accent-soft: #e5ecdd;
+    --radius: 14px;
+    --wrap: 960px;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #16130f;
+      --surface: #1e1a15;
+      --surface-2: #262019;
+      --ink: #f2ede4;
+      --ink-soft: #bdb4a6;
+      --ink-faint: #8b8276;
+      --line: #332c24;
+      --line-strong: #453c31;
+      --accent: #93b57c;
+      --accent-ink: #cbe0ba;
+      --accent-soft: #262d1f;
+    }
+  }
+
+  * { box-sizing: border-box; }
+
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 17px;
+    line-height: 1.6;
+    letter-spacing: -0.01em;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  .wrap {
+    width: 100%;
+    max-width: var(--wrap);
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  a { color: var(--accent-ink); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+  a:hover { color: var(--ink); }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  .skip {
+    position: absolute;
+    left: -9999px;
+    top: 0;
+    background: var(--surface);
+    color: var(--ink);
+    padding: 10px 16px;
+    border: 1px solid var(--line-strong);
+    border-radius: 0 0 10px 0;
+    z-index: 10;
+  }
+  .skip:focus { left: 0; }
+
+  /* ---------- hero ---------- */
+
+  .hero {
+    padding: 88px 0 56px;
+    text-align: center;
+  }
+
+  .hero .icon {
+    width: 96px;
+    height: 96px;
+    display: block;
+    margin: 0 auto 26px;
+    border-radius: 22px;
+    box-shadow: 0 1px 2px rgba(43, 33, 24, .14), 0 10px 28px rgba(43, 33, 24, .10);
+  }
+
+  h1 {
+    font-size: clamp(34px, 6vw, 52px);
+    line-height: 1.08;
+    letter-spacing: -0.03em;
+    font-weight: 600;
+    margin: 0 0 18px;
+  }
+
+  .lede {
+    font-size: clamp(18px, 2.4vw, 21px);
+    line-height: 1.5;
+    color: var(--ink-soft);
+    max-width: 34em;
+    margin: 0 auto 34px;
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+  }
+
+  .btn {
+    display: inline-block;
+    padding: 12px 24px;
+    border-radius: 980px;
+    font-size: 16px;
+    font-weight: 500;
+    text-decoration: none;
+    border: 1px solid transparent;
+    transition: background-color .15s ease, border-color .15s ease, color .15s ease;
+  }
+
+  .btn-primary { background: var(--accent); color: #ffffff; }
+  .btn-primary:hover { background: var(--accent-ink); color: #ffffff; }
+
+  @media (prefers-color-scheme: dark) {
+    .btn-primary { color: #16130f; font-weight: 600; }
+    .btn-primary:hover { background: #a7c68f; color: #16130f; }
+  }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--ink);
+    border-color: var(--line-strong);
+  }
+  .btn-secondary:hover { background: var(--surface-2); color: var(--ink); }
+
+  .hero-shot {
+    margin: 64px 0 0;
+  }
+
+  .hero-shot img {
+    display: block;
+    width: 100%;
+    max-width: 380px;
+    height: auto;
+    margin: 0 auto;
+    border-radius: 18px;
+    border: 1px solid var(--line);
+    box-shadow: 0 2px 6px rgba(43, 33, 24, .08), 0 24px 60px rgba(43, 33, 24, .14);
+  }
+
+  .hero-shot figcaption {
+    margin-top: 18px;
+    font-size: 14px;
+    color: var(--ink-faint);
+  }
+
+  /* ---------- sections ---------- */
+
+  section { padding: 72px 0; border-top: 1px solid var(--line); }
+
+  h2 {
+    font-size: clamp(24px, 3.4vw, 30px);
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    font-weight: 600;
+    margin: 0 0 12px;
+  }
+
+  .section-lede {
+    color: var(--ink-soft);
+    margin: 0 0 40px;
+    max-width: 40em;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 24px;
+  }
+
+  .card h3 {
+    font-size: 17px;
+    font-weight: 600;
+    margin: 0 0 8px;
+    letter-spacing: -0.01em;
+  }
+
+  .card p {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--ink-soft);
+  }
+
+  /* sources */
+
+  .sources {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+  }
+
+  .source {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 26px;
+  }
+
+  .source h3 {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0 0 10px;
+  }
+
+  .source p { margin: 0 0 12px; font-size: 15px; color: var(--ink-soft); }
+  .source p:last-child { margin-bottom: 0; }
+
+  code {
+    font-family: var(--mono);
+    font-size: 0.86em;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: 5px;
+    padding: 1px 5px;
+  }
+
+  /* install */
+
+  .install-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .steps {
+    margin: 0 0 28px;
+    padding-left: 22px;
+    color: var(--ink-soft);
+    font-size: 15px;
+  }
+  .steps li { margin-bottom: 6px; }
+
+  .code-block {
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  .code-block pre {
+    margin: 0;
+    padding: 22px 24px;
+    overflow-x: auto;
+    font-family: var(--mono);
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--ink);
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .code-block .copy {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink-soft);
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    padding: 5px 12px;
+    cursor: pointer;
+  }
+  .code-block .copy:hover { color: var(--ink); border-color: var(--line-strong); }
+
+  .requirement {
+    margin: 20px 0 0;
+    font-size: 14px;
+    color: var(--ink-faint);
+  }
+
+  /* footer */
+
+  footer {
+    border-top: 1px solid var(--line);
+    padding: 40px 0 56px;
+    font-size: 14px;
+    color: var(--ink-faint);
+  }
+
+  .footer-inner {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 24px;
+    align-items: baseline;
+    justify-content: space-between;
+  }
+
+  footer a { color: var(--ink-faint); }
+  footer a:hover { color: var(--ink); }
+
+  .footer-links { display: flex; gap: 20px; flex-wrap: wrap; }
+</style>
+</head>
+<body>
+<a class="skip" href="#conteudo">Pular para o conteúdo</a>
+
+<header class="hero">
+  <div class="wrap">
+    <img class="icon" src="assets/icone.png" width="256" height="256"
+         alt="Ícone do OpenRouter Meter: um medidor branco sobre um quadrado verde-sálvia.">
+    <h1>OpenRouter Meter</h1>
+    <p class="lede">Seu saldo da OpenRouter na barra de menus, e o consumo completo num clique.</p>
+    <div class="actions">
+      <a class="btn btn-primary" href="https://github.com/ronanrodrigo/openrouter-meter">Ver no GitHub</a>
+      <a class="btn btn-secondary" href="#instalacao">Como instalar</a>
+    </div>
+
+    <figure class="hero-shot">
+      <img src="assets/painel-escuro.png" width="580" height="1200"
+           alt="Painel do OpenRouter Meter em modo escuro: saldo restante de US$ 91,90 com medidor em 56%, 28 de 1.000 requisições gratuitas usadas e, em cartões separados, tokens, chamadas, custo e modelos principais de hoje e dos últimos sete dias.">
+      <figcaption>O painel em modo escuro. A mesma tela aparece em claro, seguindo a aparência do sistema.</figcaption>
+    </figure>
+  </div>
+</header>
+
+<main id="conteudo">
+  <section aria-labelledby="mostra">
+    <div class="wrap">
+      <h2 id="mostra">O que ele mostra</h2>
+      <p class="section-lede">Tudo o que importa fica visível sem abrir nada: o saldo na barra de menus e o restante num clique.</p>
+
+      <div class="grid">
+        <div class="card">
+          <h3>Saldo e medidor de consumo</h3>
+          <p>Quanto ainda resta de crédito, em dólar, sempre à vista na barra de menus. No painel, o medidor mostra a fatia já consumida do total da conta.</p>
+        </div>
+        <div class="card">
+          <h3>Cota de requisições gratuitas</h3>
+          <p>Quantas requisições gratuitas já foram usadas e quantas ainda restam, com a barra de proporção do período.</p>
+        </div>
+        <div class="card">
+          <h3>Tokens, chamadas e custo</h3>
+          <p>Hoje e nos últimos sete dias: total de tokens, número de chamadas e o custo estimado de cada janela.</p>
+        </div>
+        <div class="card">
+          <h3>Os modelos que mais pesaram</h3>
+          <p>Os modelos que mais consumiram tokens no período, ranqueados e com a proporção de cada um.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="fontes">
+    <div class="wrap">
+      <h2 id="fontes">De onde vêm os números</h2>
+      <p class="section-lede">Os dados vêm do próprio OpenRouter e do histórico local do Hermes. A origem usada fica indicada no painel.</p>
+
+      <div class="sources">
+        <div class="source">
+          <h3>Saldo e uso pela API da OpenRouter</h3>
+          <p>O saldo, o total de crédito, o medidor de consumo e a cota de requisições gratuitas vêm da API de créditos da OpenRouter, com a chave da sua conta.</p>
+          <p>A chave fica no Keychain do macOS ou em <code>$HERMES_HOME/.env</code>, nunca no código.</p>
+        </div>
+        <div class="source">
+          <h3>Tokens e modelos pelo histórico do Hermes</h3>
+          <p>Sem uma chave de provisioning da OpenRouter, o detalhamento de tokens, chamadas, custo e modelos é lido do histórico local do Hermes (<code>$HERMES_HOME/state.db</code>), em modo somente leitura.</p>
+          <p>Quando é essa a origem, o painel exibe <strong>Histórico local do Hermes</strong> no cabeçalho — você sabe de onde veio cada número.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="instalacao" aria-labelledby="instalar">
+    <div class="wrap">
+      <h2 id="instalar">Como instalar</h2>
+      <p class="section-lede">O projeto é aberto e compila na sua máquina. Não há binário assinado distribuído — o caminho é o código-fonte.</p>
+
+      <ol class="steps">
+        <li>Clone o repositório.</li>
+        <li>Instale o XcodeGen, o SwiftLint e o SwiftFormat via Homebrew.</li>
+        <li>Rode <code>make app</code>: o projeto é gerado, compilado e o app abre.</li>
+      </ol>
+
+      <div class="code-block">
+        <button class="copy" type="button" data-copy>Copiar</button>
+        <pre id="comandos"><code>git clone https://github.com/ronanrodrigo/openrouter-meter.git
+cd openrouter-meter
+brew install xcodegen swiftlint swiftformat
+make app</code></pre>
+      </div>
+
+      <p class="requirement">Requisitos: macOS 15 ou superior, com Xcode 26 e a toolchain do Swift 6 instalados.</p>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap footer-inner">
+    <p style="margin:0">OpenRouter Meter — Ronan Rodrigo Nunes. Licenciado sob a MIT.</p>
+    <nav class="footer-links" aria-label="Rodapé">
+      <a href="https://github.com/ronanrodrigo/openrouter-meter">github.com/ronanrodrigo/openrouter-meter</a>
+    </nav>
+  </div>
+</footer>
+
+<script>
+  (function () {
+    var btn = document.querySelector('[data-copy]');
+    var pre = document.getElementById('comandos');
+    if (!btn || !pre || !navigator.clipboard) return;
+    btn.addEventListener('click', function () {
+      navigator.clipboard.writeText(pre.innerText).then(function () {
+        btn.textContent = 'Copiado';
+        setTimeout(function () { btn.textContent = 'Copiar'; }, 1600);
+      });
+    });
+  })();
+</script>
+</body>
+</html>

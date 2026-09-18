@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+# Bloqueia commit que introduza credencial.
+#
+# Lê apenas o diff preparado (`git diff --cached`), então não olha o que você não vai
+# commitar. Nunca imprime o valor suspeito — só arquivo, linha e o nome do padrão.
+#
+# Ativar neste clone:   git config core.hooksPath .githooks
+# Contornar (consciente):  ALLOW_SECRET_COMMIT=1 git commit ...
+set -uo pipefail
+
+if [ "${ALLOW_SECRET_COMMIT:-0}" = "1" ]; then
+    echo "aviso: hook de credencial ignorado por ALLOW_SECRET_COMMIT=1"
+    exit 0
+fi
+
+DIFF=$(git diff --cached -U0 -- . ':(exclude)*.lock' || true)
+[ -z "$DIFF" ] && exit 0
+
+# Padrões de credencial. Fixtures curtas de teste (ex.: "sk-or-v1-teste") não casam:
+# os padrões exigem comprimento de token real.
+PATTERNS=(
+    'sk-or-v1-[A-Za-z0-9]{32,}'
+    'sk-[A-Za-z0-9]{40,}'
+    'ghp_[A-Za-z0-9]{20,}'
+    'github_pat_[A-Za-z0-9_]{40,}'
+    'AKIA[0-9A-Z]{16}'
+    'AIza[0-9A-Za-z_-]{30,}'
+    'xox[baprs]-[A-Za-z0-9-]{10,}'
+    '-----BEGIN [A-Z ]*PRIVATE KEY-----'
+    'postgres(ql)?://[^:]+:[^@]+@'
+)
+
+found=0
+for pattern in "${PATTERNS[@]}"; do
+    while IFS= read -r file; do
+        [ -z "$file" ] && continue
+        if git diff --cached -U0 -- "$file" | grep -qE "^\+.*${pattern}"; then
+            lines=$(git diff --cached -U0 -- "$file" | grep -nE "^\+.*${pattern}" | cut -d: -f1 | tr '\n' ' ')
+            echo "BLOQUEADO: possivel credencial em $file (hunks: ${lines})"
+            echo "  padrao: ${pattern%%\{*}[...]"
+            found=1
+        fi
+    done < <(git diff --cached --name-only --diff-filter=ACM)
+done
+
+if [ "$found" = "1" ]; then
+    cat <<'EOF'
+
+Nada foi commitado. Credencial nao entra no repositorio: use o Keychain do app,
+um arquivo .env ignorado pelo git ou um secret do CI.
+Se for falso positivo, rode de novo com ALLOW_SECRET_COMMIT=1 e diga o motivo no commit.
+EOF
+    exit 1
+fi
+
+exit 0

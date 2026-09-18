@@ -25,6 +25,14 @@ struct MoneyTests {
         #expect(Money(dollars: 3) > Money(dollars: 1))
     }
 
+    @Test("acumula com +=")
+    func compoundAssignment() {
+        var total = Money(dollars: 12.34)
+        total += Money(dollars: 48.10)
+        #expect(total == Money(dollars: 60.44))
+        #expect(total.micros == 60_440_000)
+    }
+
     @Test("detecta zero e valor negativo")
     func signProperties() {
         #expect(Money.zero.isZero)

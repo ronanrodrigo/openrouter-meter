@@ -98,3 +98,4 @@ O mesmo `execute()` roda em intervalo configurável (padrão 300s) e a cada aber
 - [ADR 0001 — App de barra de menus em camadas SwiftPM](adr/0001-architecture.md)
 - [ADR 0002 — Fontes de dados e degradação](adr/0002-data-sources.md)
 - [ADR 0003 — Duas políticas de cobertura](adr/0003-coverage-policy.md)
+- [ADR 0004 — CI no GitHub Actions](adr/0004-ci-github-actions.md)
