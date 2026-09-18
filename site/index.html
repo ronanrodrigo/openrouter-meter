@@ -448,7 +448,7 @@
 
       <h3 class="sub-title">O tap e a manutenção</h3>
       <ul class="steps">
-        <li>Tap: <code>ronanrodrigo/homebrew-tap</code>, cask <code>openrouter-meter</code>. O comando acima já traz o tap; a variante explícita é <code>brew tap ronanrodrigo/tap</code> e, em seguida, <code>brew install --cask openrouter-meter</code>.</li>
+        <li>Nome curto: o Homebrew 7 exige confiança em taps de terceiros, então antes de instalar por <code>brew install --cask openrouter-meter</code> é preciso confiar no cask: <code>brew trust --cask ronanrodrigo/tap/openrouter-meter</code>. O comando acima, com o nome completo, já passa por essa checagem.</li>
         <li>Atualizar: <code>brew upgrade --cask openrouter-meter</code>.</li>
         <li>Desinstalar: <code>brew uninstall --cask openrouter-meter</code>.</li>
       </ul>

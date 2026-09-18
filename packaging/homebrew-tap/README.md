@@ -11,6 +11,14 @@ brew tap ronanrodrigo/tap
 O comando acima não é necessário quando se instala um cask diretamente pelo nome completo,
 porque o Homebrew faz o tap automaticamente.
 
+O Homebrew 7 exige confiança (tap trust) para casks de taps de terceiros. Instalar pelo nome
+completo do cask, como nos comandos deste README, já autoriza a instalação. Para instalar pelo
+nome curto, confie antes:
+
+```bash
+brew trust --cask ronanrodrigo/tap/openrouter-meter
+```
+
 ## OpenRouter Meter
 
 App de barra de menus do macOS que exibe o saldo e o consumo da conta do OpenRouter.

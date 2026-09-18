@@ -70,8 +70,13 @@ Se preferir os dois passos explícitos:
 
 ```bash
 brew tap ronanrodrigo/tap
+brew trust --cask ronanrodrigo/tap/openrouter-meter   # o Homebrew 7 exige confiança em taps de terceiros
 brew install --cask openrouter-meter
 ```
+
+O comando de cima (nome completo do cask) já passa pela checagem de confiança do Homebrew 7,
+porque o cask é nomeado explicitamente. A partir do nome curto, o tap precisa ser confiado
+antes.
 
 Atualizar e desinstalar:
 

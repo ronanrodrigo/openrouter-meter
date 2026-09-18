@@ -52,14 +52,20 @@ o que está em andamento e o estado do gate.
 - O cask é sincronizado a partir do release publicado (`scripts/sync-tap.sh` lê o asset
   `.sha256` do release): o build universal não é bit a bit reprodutível, então o hash de um
   build local não vale para o cask.
-- ADR 0005 registrado. Ele é o gatilho previsto no ADR 0004, que exige ADR novo para etapas
+- ADR 0005 registrado. Ele é o gatilho previsto no ADR 0004, que exige nova decisão para etapas
   além do gate (build de release e artefato).
+- Release `v1.0.0` publicado e instalado de verdade: `brew install --cask
+  ronanrodrigo/tap/openrouter-meter` instala o zip universal no `/Applications`, sem
+  quarentena na app instalada, e o app abre. O cask usa `postflight_steps` (a forma atual do
+  DSL; `postflight` está depreciado no Homebrew 7). O Homebrew 7 também exige confiança em
+  taps de terceiros: instalar pelo nome completo do cask já autoriza; pelo nome curto, é
+  preciso `brew trust --cask ronanrodrigo/tap/openrouter-meter`.
 
 ## Estado atual
 
 - Gate local `make verify-pr` verde na máquina de desenvolvimento.
 - CI commitado e validado sintaticamente, aguardando o primeiro push para rodar de verdade.
-- Distribuição por Homebrew cask decidida e escrita (ADR 0005), com release automatizado por
-  tag. Nem o release nem a instalação pelo cask rodaram ainda: dependem do primeiro push e de
-  uma tag `v<VERSION>` que case com `MARKETING_VERSION`.
+- Distribuição por Homebrew cask em produção: a tag `v1.0.0` publicou o release, o cask foi
+  sincronizado no tap e a instalação pelo Homebrew foi verificada de ponta a ponta. Instalar
+  continua sendo `brew install --cask ronanrodrigo/tap/openrouter-meter`.
 - Sem segredos e sem PII no conteúdo versionado.
