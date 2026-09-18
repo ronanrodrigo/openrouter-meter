@@ -105,3 +105,24 @@ Use os templates em `.github/ISSUE_TEMPLATE/`:
 
 O CI (`.github/workflows/verify.yml`) roda `make verify-pr` em cada push na `main` e em cada
 pull request. Um PR com o gate vermelho no CI não é mesclado.
+
+## Release e distribuição
+
+O app é distribuído por **Homebrew cask**, e o release é gerado a partir do código-fonte. A
+invariante que sustenta tudo: **a versão vive em `MARKETING_VERSION` no `project.yml` e a tag
+de release precisa bater com ela** — versão `1.1.0` significa tag `v1.1.0`. A tag é o gatilho:
+ela dispara `.github/workflows/release.yml`, que compila o app e publica o
+`OpenRouterMeter-<VERSION>.zip` (universal, arm64 e x86_64) nas releases do repositório.
+
+```bash
+make package                # empacota o app no zip de release
+make release VERSION=x.y.z  # publica o release e atualiza o cask no tap
+make sync-tap VERSION=x.y.z # atualiza só o cask, a partir do release já publicado
+```
+
+Regra prática: mude a versão no `project.yml` **antes** de taguear; tag e
+`MARKETING_VERSION` divergentes produzem um artefato com nome errado. O conteúdo do tap
+público (`ronanrodrigo/homebrew-tap`, cask `Casks/openrouter-meter.rb`) fica versionado em
+`packaging/homebrew-tap/`, e a instalação canônica é
+`brew install --cask ronanrodrigo/tap/openrouter-meter`. A assinatura é ad-hoc, sem
+notarização: o cask remove a quarentena da app instalada para que ela abra normalmente.

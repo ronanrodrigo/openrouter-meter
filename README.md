@@ -7,6 +7,7 @@
 [![verify-pr](https://github.com/ronanrodrigo/openrouter-meter/actions/workflows/verify.yml/badge.svg)](https://github.com/ronanrodrigo/openrouter-meter/actions/workflows/verify.yml)
 ![macOS 15+](https://img.shields.io/badge/macOS-15%2B-000000?logo=apple&logoColor=white)
 ![Swift 6](https://img.shields.io/badge/Swift-6-F05138?logo=swift&logoColor=white)
+[![Homebrew](https://img.shields.io/badge/homebrew-cask-2f6feb)](https://github.com/ronanrodrigo/homebrew-tap)
 [![Licença MIT](https://img.shields.io/badge/licen%C3%A7a-MIT-2f6feb.svg)](LICENSE)
 
 <img src="docs/images/barra-e-painel.png" width="400" alt="Print real do app: o item da barra de menus do macOS com o ícone de medidor e o saldo US$ 87,93, e logo abaixo o painel completo com saldo restante, requisições gratuitas, custo de hoje e dos últimos sete dias e os modelos principais">
@@ -52,8 +53,43 @@ painel o relatório é relido, e o app atualiza sozinho no intervalo escolhido.
 
 ## Instalação
 
-Requisitos: **macOS 15 ou mais recente**, **Xcode 26** com toolchain **Swift 6** e as
-ferramentas de build (via [Homebrew](https://brew.sh)):
+Requisito: **macOS 15 ou mais recente**.
+
+### Homebrew (recomendado)
+
+```bash
+brew install --cask ronanrodrigo/tap/openrouter-meter
+```
+
+O cask mora no tap público [`ronanrodrigo/homebrew-tap`](https://github.com/ronanrodrigo/homebrew-tap)
+(`Casks/openrouter-meter.rb`) e instala o `OpenRouterMeter-<VERSION>.zip` publicado nas
+[releases](https://github.com/ronanrodrigo/openrouter-meter/releases): binário universal, arm64
+e x86_64, compilado a partir do código-fonte pelo workflow de release a cada tag `v*`.
+
+Se preferir os dois passos explícitos:
+
+```bash
+brew tap ronanrodrigo/tap
+brew install --cask openrouter-meter
+```
+
+Atualizar e desinstalar:
+
+```bash
+brew upgrade --cask openrouter-meter           # atualiza para a última release
+brew uninstall --cask openrouter-meter         # desinstala
+brew uninstall --zap --cask openrouter-meter   # desinstala e remove os resíduos
+```
+
+**Sobre a assinatura:** o binário é assinado **ad-hoc** e **não é notarizado** — não há
+certificado Developer ID no fluxo de release. Ao instalar, o cask remove o atributo de
+quarentena da app para que ela abra normalmente. O código é aberto (MIT) e o build é
+reprodutível localmente (veja abaixo), se você preferir conferir o que roda.
+
+### A partir do código-fonte
+
+Para compilar você mesmo, com **Xcode 26** (toolchain **Swift 6**) e as ferramentas de build
+(via [Homebrew](https://brew.sh)):
 
 ```bash
 brew install xcodegen swiftlint swiftformat
@@ -165,8 +201,24 @@ make test        # só os testes
 make lint        # SwiftLint --strict
 make format      # SwiftFormat
 make app         # compila e abre o app
+make package      # empacota o app no zip universal de release
+make release VERSION=x.y.z  # publica o release e atualiza o cask no tap
 make clean       # remove build/, .xcodeproj e os .build dos pacotes
 ```
+
+### Release
+
+A versão vive em `MARKETING_VERSION` no [`project.yml`](project.yml), e a tag precisa bater
+com ela: a versão `1.0.0` corresponde à tag `v1.0.0`. É a tag que dispara o workflow
+[`.github/workflows/release.yml`](.github/workflows/release.yml), que compila o app a partir
+do código-fonte e publica o `OpenRouterMeter-<VERSION>.zip` nas releases. Localmente,
+`make package` gera esse zip e `make release VERSION=x.y.z` faz a publicação
+([`scripts/package.sh`](scripts/package.sh) e [`scripts/release.sh`](scripts/release.sh)); o
+cask do tap é sincronizado por `make sync-tap VERSION=x.y.z`
+([`scripts/sync-tap.sh`](scripts/sync-tap.sh)), que lê o sha256 do asset `.sha256` do release
+publicado — o build universal não é bit a bit reprodutível, então o cask nunca aponta para o
+hash de um build local. O conteúdo do tap é versionado em
+[`packaging/homebrew-tap/`](packaging/homebrew-tap/).
 
 ### Cobertura
 
@@ -211,8 +263,9 @@ Um falso positivo consciente pode ser liberado com `ALLOW_SECRET_COMMIT=1 git co
 
 ## Limitações
 
-- **Só macOS 15 ou mais recente**, e o app é compilado a partir do código-fonte: não há
-  binário assinado ou notarizado, nem instalação por `brew install --cask`.
+- **Só macOS 15 ou mais recente**. A distribuição é pelo cask de um tap pessoal
+  (`ronanrodrigo/homebrew-tap`), e o binário é assinado ad-hoc, sem notarização: em vez de um
+  certificado Developer ID, o cask remove a quarentena da app instalada para que ela abra.
 - **O detalhamento de tokens e modelos depende do Hermes** enquanto não houver chave de
   provisioning. Consumo de outras ferramentas com a mesma conta não aparece nos cartões.
 - **Custo por janela é o que o histórico registra**: o valor cobrado quando existe
