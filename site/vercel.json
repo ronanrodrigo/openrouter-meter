@@ -1,0 +1,9 @@
+{
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "destination": "https://ronanrodrigo.dev/lab/openrouter-meter",
+      "permanent": true
+    }
+  ]
+}
