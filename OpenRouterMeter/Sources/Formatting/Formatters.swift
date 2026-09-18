@@ -3,16 +3,13 @@ import Foundation
 
 /// Formatação de dinheiro, tokens e tempo para a interface.
 ///
-/// Textos de interface são pt-BR (idioma do produto). Números e datas usam `Locale` do
-/// sistema: quando o idioma do sistema é português usamos `Locale.current`; caso
-/// contrário caímos para pt-BR, mantendo o padrão brasileiro para valores em dólar
-/// (`US$ 91,90`). Nenhum formatador é compartilhado entre chamadas.
+/// Textos de interface são pt-BR (idioma do produto), e os números seguem o mesmo padrão
+/// de forma **explícita** — não o idioma da máquina. Derivar do `Locale.current` fazia o
+/// mesmo saldo aparecer como `US$ 91,90` para quem usa o sistema em português e `$ 91.90`
+/// para quem usa em inglês, e ainda tornava o resultado dependente do ambiente.
 enum Formatters {
     /// Locale de exibição do aplicativo.
-    static var displayLocale: Locale {
-        let current = Locale.current
-        return current.language.languageCode?.identifier == "pt" ? current : Locale(identifier: "pt_BR")
-    }
+    static let displayLocale = Locale(identifier: "pt_BR")
 
     // MARK: - Dinheiro
 
