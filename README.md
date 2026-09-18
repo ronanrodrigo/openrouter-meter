@@ -9,12 +9,13 @@
 ![Swift 6](https://img.shields.io/badge/Swift-6-F05138?logo=swift&logoColor=white)
 [![Licença MIT](https://img.shields.io/badge/licen%C3%A7a-MIT-2f6feb.svg)](LICENSE)
 
-<img src="docs/images/barra-de-menus.png" width="540" alt="Item da barra de menus do macOS com o ícone de medidor e o saldo US$ 90,27">
+<img src="docs/images/barra-e-painel.png" width="400" alt="Print real do app: o item da barra de menus do macOS com o ícone de medidor e o saldo US$ 87,93, e logo abaixo o painel completo com saldo restante, requisições gratuitas, custo de hoje e dos últimos sete dias e os modelos principais">
 
 </div>
 
 Sem clicar, o saldo. Com um clique, o painel completo: consumo, cota de requisições
 gratuitas, tokens, chamadas, custo e os modelos que mais pesaram hoje e nos últimos sete dias.
+O print acima é de uma conta real, com a barra de menus e o relatório inteiro na mesma imagem.
 
 <table>
 <tr>
@@ -37,7 +38,7 @@ hoje. Sem leitura ainda, a barra mostra `—`.
 **No painel**:
 
 - **Saldo restante**, com o medidor de consumo logo abaixo — crédito consumido, em
-  porcentagem, e a linha `US$ 119,73 de US$ 210,00` com `57%`.
+  porcentagem, e a linha `US$ 122,07 de US$ 210,00` com `58%`.
 - **Requisições gratuitas**, a cota diária dos modelos gratuitos: `34 de 1.000 · restam 966`.
 - **HOJE** e **ÚLTIMOS 7 DIAS** — dois cartões com **Tokens**, **Chamadas** e **Custo**, e a
   distribuição entre os **Modelos principais** (participação em tokens de entrada, barra por
