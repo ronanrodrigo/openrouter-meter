@@ -81,9 +81,9 @@ Negativas e riscos:
 
 - **Quarentena.** O Homebrew 7 aplica quarentena a todo cask baixado e não tem mais a flag
   `--no-quarantine`. Sem tratar isso, o Gatekeeper bloqueia a abertura do app em toda
-  instalação. O cask remove o atributo `com.apple.quarantine` da app instalada em
-  `postflight` — é o que faz a instalação funcionar dentro da restrição de assinatura. É uma
-  consequência aceita, não um detalhe: o `postflight` existe por causa da ausência de
+  instalação. O cask remove o atributo `com.apple.quarantine` da app instalada no
+  `postflight_steps` — é o que faz a instalação funcionar dentro da restrição de assinatura. É uma
+  consequência aceita, não um detalhe: o `postflight_steps` existe por causa da ausência de
   notarização, e a remoção da quarentena é uma operação do cask sobre o app instalado, não
   uma assinatura. Isso é risco de confiança para quem instala: a checagem que o Gatekeeper
   faria está sendo contornada por um passo do cask.
@@ -94,6 +94,13 @@ Negativas e riscos:
   `TAP_GITHUB_TOKEN`, um PAT com permissão de escrita no tap. Sem esse segredo, o passo de
   atualização do cask é pulado e o resumo do job mostra o comando local para atualizar o tap à
   mão. Ou seja: o release do artefato não depende do segredo, mas a propagação ao tap depende.
+- **Confiança no tap.** O Homebrew 7 recusa carregar casks de taps de terceiros que não estejam
+  confiados. Nomear o cask por inteiro na linha de comando —
+  `brew install --cask ronanrodrigo/tap/openrouter-meter`, o comando que a documentação
+  recomenda — autoriza a instalação sem passo extra. Pelo nome curto
+  (`brew install --cask openrouter-meter`, depois de um `brew tap`), é preciso confiar antes:
+  `brew trust --cask ronanrodrigo/tap/openrouter-meter`. É um passo a mais que só existe
+  porque o tap não é oficial.
 - Publicar um cask em tap próprio adiciona um segundo repositório a manter, e uma nova classe
   de falha (token expirado, tap dessincronizado do artefato).
 

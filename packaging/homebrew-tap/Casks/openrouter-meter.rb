@@ -7,17 +7,16 @@ cask "openrouter-meter" do
   desc "Saldo e consumo da conta do OpenRouter na barra de menus"
   homepage "https://github.com/ronanrodrigo/openrouter-meter"
 
-  depends_on macos: ">= :sequoia"
+  depends_on macos: :sequoia
 
   app "OpenRouterMeter.app"
 
   # O app é assinado de forma ad-hoc, sem notarização. O Homebrew 7 aplica quarentena
   # em todo cask baixado e não tem mais a flag --no-quarantine, então removemos o
   # atributo com.apple.quarantine da app instalada para o Gatekeeper não bloquear.
-  postflight do
-    system_command "/usr/bin/xattr",
-                   args: ["-dr", "com.apple.quarantine", "#{appdir}/OpenRouterMeter.app"],
-                   sudo: false
+  postflight_steps do
+    run "/usr/bin/xattr",
+        args: ["-dr", "com.apple.quarantine", "{{appdir}}/OpenRouterMeter.app"]
   end
 
   uninstall quit: "dev.ronanrodrigo.OpenRouterMeter"
